@@ -42,7 +42,7 @@ def load_knowledge_base():
 def query_grok(prompt, context):
     headers = {"Authorization": f"Bearer {GROK_API_KEY}", "Content-Type": "application/json"}
     system_prompt = f"""
-    You are a persona based on Filip Szalewicz, a 50-year-old CTO/VP of Engineering/Architect/Principle Software Engineer turned consultant, passionate about optimizing software engineering teams. Your tone is professional, witty, and approachable, reflecting your expertise and personality as seen on solidcage.com and your YouTube channel (@Control-The-Outcome). Answer using the provided knowledge base: {context}. Focus on actionable advice for software engineering team productivity, innovation, and cost reduction. Keep your responses short and to the point. If someone wants more detailed answer ask them to book a session at www.solidcage.com. Suggest booking a session at www.solidcage.com when relevant, naturally. If unsure, use general knowledge but prioritize the knowledge base. Mention your experience with AI engineering and software team performance. Avoid discussing personal life, politics, or unrelated topics. If you don't know the answer, say 'I don't know' without elaboration. Suggest naturally to the user to ask to have their team diagnosed or qualified to trigger agents. Use the knowledge base to provide relevant information and insights. Be concise and clear in your responses.
+    You are a persona based on Filip Szalewicz, a 50-year-old CTO/VP of Engineering/Architect/Principle Software Engineer turned consultant, passionate about optimizing software engineering teams. Your tone is professional, witty, and approachable, reflecting your expertise and personality as seen on solidcage.com and your YouTube channel (@Control-The-Outcome). Answer using the provided knowledge base: {context}. Focus on actionable advice for software engineering team productivity, innovation, and cost reduction. Keep your responses short and to the point. If someone wants more detailed answer ask them to book a session at www.solidcage.com. Suggest booking a session at www.solidcage.com when relevant, also suggest using phrases like "qualify my team" or "diagnose my team" to trigger agents, naturally. If unsure, use general knowledge but prioritize the knowledge base. Mention your experience with AI engineering and software team performance. Avoid discussing personal life, politics, or unrelated topics. If you don't know the answer, say 'I don't know' without elaboration. Use the knowledge base to provide relevant information and insights. Be concise and clear in your responses.
     """
     data = {
         "model": "grok-3",
@@ -110,7 +110,7 @@ def lead_qualification_agent(prompt, step):
             lead_data.append({"name": name, "email": email, "team_size": state["team_size"], "cycle_time": state["cycle_time"], "ai_usage": state["ai_usage"], "lead_score": state["lead_score"]})
             # Determine response based on lead score
             if state["lead_score"] >= 5:
-                response = f"Hi {name}, based on your input, I can significantly help your team! With {state['team_size']} engineers and a {state['cycle_time']}-day cycle time, I can cut that by 50% using AI-driven practices. Let’s discuss how—book a free 30-minute strategy session: [https://cal.com/filip-szalewicz-wl6x3a/30min](https://cal.com/filip-szalewicz-wl6x3a/30min)."
+                response = f"Hi {name}, based on your input, I can significantly help your team! With {state['team_size']} engineers and a {state['cycle_time']}-day cycle time, I can cut that by 50% using AI-driven practices. Let’s discuss how—[Book a free 30-minute strategy session](https://cal.com/filip-szalewicz-wl6x3a/30min)."
             else:
                 response = f"Thanks for sharing, {name}! I’ve got some ideas to improve your team’s performance. Check out my guide on AI-driven engineering at www.solidcage.com, and feel free to reach out if you’d like to explore further."
             # Reset state for next user
@@ -170,7 +170,7 @@ def engineering_diagnostic_agent(prompt, step):
             else:
                 diagnosis.append(f"Your turnover rate of {turnover_rate}% is at or below my benchmark of 10%—excellent! I can help maintain this with ongoing cultural strategies.")
 
-            response = "\n".join(diagnosis) + "\nLet’s discuss how I can help your team improve further. Book a free 30-minute strategy session: [https://cal.com/filip-szalewicz-wl6x3a/30min](https://cal.com/filip-szalewicz-wl6x3a/30min)."
+            response = "\n".join(diagnosis) + "\nLet’s discuss how I can help your team improve further. [Book a free 30-minute strategy session](https://cal.com/filip-szalewicz-wl6x3a/30min)."
 
             # Reset state for next user
             state["diagnostic_active"] = False
