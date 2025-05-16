@@ -1,0 +1,17 @@
+I am going to show you how you can become a hero in your startup, boost your team morale, put out some fires and make new friends. 
+
+Working at a startup has lots of highs and lows, its common to have lots of fires along the journey, long weekend hours, last minutes code changes, living the dream.  To quickly become a hero to your fellow team members, consider taking on the role of a firefighter.  You will have to be the go to person for the on call and solve hard problems, but you will become everyone's best friend.  Also, learning how to diagnose an issue under pressure (time and people) is the fastest way to hone in your debugging, integration testing, understanding of the code and problem solving skills. 
+
+The firefighter is often celebrated as they become adept at rapid problem solving while under pressure, a skillset that is very valuable (and highly compensated) especially in organizations with complex products and high downtime cost. 
+
+Let me share with you how you can get started and what strategy to apply to become a super effective firefighter. 
+
+The key to success is to : 
+
+• say yes to being on call, its sink or swim time, don't have any fear, if you are new then you will be paired up with an experienced engineer 
+• identify parts of the system prone to highest rate of failure, then study the code and learn how to test all related components so that you have hand on knowledge of how they should behave when NOT working 
+• understand the exceptions, that's the key to rapid diagnosis under pressure 
+• after a crisis is resolved step up and own the implementation of a permanent fix 
+
+Being on point for high pressure situations forces you into a rapid learning mode, your ability to comprehend various systems and tools will grow at an exponential rate, soon you will be able to stop guessing what is happening and instead actually know what's happening, and of course every problem solved becomes a story to talk about during your review as you negotiate your pay rise.  
+Also, don't forget that everyone loves a hero since nobody wants to deal with the fires.
