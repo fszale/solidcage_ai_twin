@@ -70,8 +70,7 @@ with col1:
     **Ready to optimize your team?**
     """)
 with col2:
-    st.image("./static/logo.png", caption="Solidcage Consulting", width=200)
-st.button("Book a FREE 30-Minute Strategy Call Now", on_click=lambda: st.write("https://cal.com/filip-szalewicz-wl6x3a/30min"))
+    st.button("Book a FREE 30-Minute Strategy Call Now", on_click=lambda: st.write("https://cal.com/filip-szalewicz-wl6x3a/30min"))
 st.markdown("---")
 
 if "messages" not in st.session_state:
