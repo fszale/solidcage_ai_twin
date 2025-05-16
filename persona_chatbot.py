@@ -7,6 +7,7 @@ import requests
 import chromadb
 from sentence_transformers import SentenceTransformer
 import os
+import re
 
 # Initialize Grok API (replace with your API key)
 GROK_API_URL = "https://api.x.ai/v1/chat/completions"
@@ -41,7 +42,7 @@ def load_knowledge_base():
 def query_grok(prompt, context):
     headers = {"Authorization": f"Bearer {GROK_API_KEY}", "Content-Type": "application/json"}
     system_prompt = f"""
-    You are a persona based on Filip Szalewicz, a 50-year-old CTO/VP of Engineering/Architect/Principle Software Engineer turned consultant, passionate about optimizing software engineering teams. Your tone is professional, witty, and approachable, reflecting your expertise and personality as seen on solidcage.com and your YouTube channel (@Control-The-Outcome). Answer using the provided knowledge base: {context}. Focus on actionable advice for software engineering team productivity, innovation, and cost reduction. Keep your responses short and to the point. If someone wants more detailed answer ask them to book a session at www.solidcage.com. Suggest booking a session at www.solidcage.com when relevant, naturally. If unsure, use general knowledge but prioritize the knowledge base. Mention your experience with AI engineering and software team performance. Avoid discussing personal life, politics, or unrelated topics. If you don't know the answer, say 'I don't know' without elaboration. Use the knowledge base to provide relevant information and insights. Be concise and clear in your responses. Naturally ask if the users want to have their teams qualified or diagnosed to trigger the agents or if they are using AI tools. If they are not using AI tools, ask them to book a free session at www.solidcage.com.
+    You are a persona based on Filip Szalewicz, a 50-year-old CTO/VP of Engineering/Architect/Principle Software Engineer turned consultant, passionate about optimizing software engineering teams. Your tone is professional, witty, and approachable, reflecting your expertise and personality as seen on solidcage.com and your YouTube channel (@Control-The-Outcome). Answer using the provided knowledge base: {context}. Focus on actionable advice for software engineering team productivity, innovation, and cost reduction. Keep your responses short and to the point. If someone wants more detailed answer ask them to book a session at www.solidcage.com. Suggest booking a session at www.solidcage.com when relevant, naturally. If unsure, use general knowledge but prioritize the knowledge base. Mention your experience with AI engineering and software team performance. Avoid discussing personal life, politics, or unrelated topics. If you don't know the answer, say 'I don't know' without elaboration. Suggest naturally to the user to ask to have their team diagnosed or qualified to trigger agents. Use the knowledge base to provide relevant information and insights. Be concise and clear in your responses.
     """
     data = {
         "model": "grok-3",
@@ -64,53 +65,49 @@ def query_grok(prompt, context):
         return f"Failed to parse API response: {e}\nRaw response: {response.text}"
 
 # Lead Qualification Agent
-def lead_qualification_agent(prompt):
+def lead_qualification_agent(prompt, step):
     state = st.session_state.agent_state
     lead_data = st.session_state.lead_data
 
-    # Step 1: Check if we're in lead qualification mode
-    if not state["lead_qualifying"]:
-        state["lead_qualifying"] = True
-        state["lead_score"] = 0
-        return "Let’s see if I can help your team. How many engineers are on your team?"
-
-    # Step 2: Collect team size
-    if "team_size" not in state:
+    # Step 1: Collect team size
+    if step == 1:
         try:
             team_size = int(prompt)
             state["team_size"] = team_size
             if team_size > 10:
                 state["lead_score"] += 2  # High potential for larger teams
+            state["step"] = 2
             return "Got it. What’s your current cycle time for delivering features (in days)?"
         except ValueError:
             return "Please enter a number for your team size. How many engineers are on your team?"
 
-    # Step 3: Collect cycle time
-    if "cycle_time" not in state:
+    # Step 2: Collect cycle time
+    if step == 2:
         try:
             cycle_time = float(prompt)
             state["cycle_time"] = cycle_time
             if cycle_time > 7:
                 state["lead_score"] += 3  # High potential if cycle time is slow
+            state["step"] = 3
             return "Are you currently using AI tools to improve performance? (Yes/No)"
         except ValueError:
             return "Please enter a number for your cycle time in days. What’s your current cycle time?"
 
-    # Step 4: Collect AI usage
-    if "ai_usage" not in state:
+    # Step 3: Collect AI usage
+    if step == 3:
         ai_usage = prompt.lower()
         state["ai_usage"] = ai_usage
         if "no" in ai_usage:
             state["lead_score"] += 2  # High potential if not using AI
+        state["step"] = 4
         return "Thanks! Lastly, may I have your name and email to follow up with personalized insights?"
 
-    # Step 5: Collect lead information
-    if "lead_info" not in state:
+    # Step 4: Collect lead information
+    if step == 4:
         lead_info = prompt.split(",")
         if len(lead_info) >= 2:
             name, email = lead_info[0].strip(), lead_info[1].strip()
             lead_data.append({"name": name, "email": email, "team_size": state["team_size"], "cycle_time": state["cycle_time"], "ai_usage": state["ai_usage"], "lead_score": state["lead_score"]})
-            state["lead_info"] = True
             # Determine response based on lead score
             if state["lead_score"] >= 5:
                 response = f"Hi {name}, based on your input, I can significantly help your team! With {state['team_size']} engineers and a {state['cycle_time']}-day cycle time, I can cut that by 50% using AI-driven practices. Let’s discuss how—book a free 30-minute strategy session: [https://cal.com/filip-szalewicz-wl6x3a/30min](https://cal.com/filip-szalewicz-wl6x3a/30min)."
@@ -118,44 +115,40 @@ def lead_qualification_agent(prompt):
                 response = f"Thanks for sharing, {name}! I’ve got some ideas to improve your team’s performance. Check out my guide on AI-driven engineering at www.solidcage.com, and feel free to reach out if you’d like to explore further."
             # Reset state for next user
             state["lead_qualifying"] = False
+            state["step"] = 0
             state.pop("team_size", None)
             state.pop("cycle_time", None)
             state.pop("ai_usage", None)
-            state.pop("lead_info", None)
             state["lead_score"] = 0
             return response
         return "Please provide your name and email, separated by a comma (e.g., John, john@email.com)."
 
 # Engineering Performance Diagnostic Agent
-def engineering_diagnostic_agent(prompt):
+def engineering_diagnostic_agent(prompt, step):
     state = st.session_state.agent_state
 
-    # Step 1: Check if we're in diagnostic mode
-    if not state["diagnostic_active"]:
-        state["diagnostic_active"] = True
-        state["team_metrics"] = {}
-        return "Let’s diagnose your team’s performance. What’s your current cycle time for delivering features (in days)?"
-
-    # Step 2: Collect cycle time
-    if "cycle_time" not in state["team_metrics"]:
+    # Step 1: Collect cycle time
+    if step == 1:
         try:
             cycle_time = float(prompt)
             state["team_metrics"]["cycle_time"] = cycle_time
+            state["step"] = 2
             return "How many features does your team deliver per quarter?"
         except ValueError:
             return "Please enter a number for your cycle time in days. What’s your current cycle time?"
 
-    # Step 3: Collect features per quarter
-    if "features_per_quarter" not in state["team_metrics"]:
+    # Step 2: Collect features per quarter
+    if step == 2:
         try:
             features = int(prompt)
             state["team_metrics"]["features_per_quarter"] = features
+            state["step"] = 3
             return "What’s your team’s turnover rate (as a percentage)?"
         except ValueError:
             return "Please enter a number for features per quarter. How many features do you deliver?"
 
-    # Step 4: Collect turnover rate and provide diagnosis
-    if "turnover_rate" not in state["team_metrics"]:
+    # Step 3: Collect turnover rate and provide diagnosis
+    if step == 3:
         try:
             turnover_rate = float(prompt)
             state["team_metrics"]["turnover_rate"] = turnover_rate
@@ -181,6 +174,7 @@ def engineering_diagnostic_agent(prompt):
 
             # Reset state for next user
             state["diagnostic_active"] = False
+            state["step"] = 0
             state["team_metrics"] = {}
             return response
         except ValueError:
@@ -198,6 +192,19 @@ DIAGNOSTIC_TRIGGERS = [
     "check my team performance", "analyze my team", "team performance diagnosis",
     "how is my team doing", "improve my team performance"
 ]
+
+# Function to check if a phrase matches any trigger
+def matches_trigger(prompt, triggers):
+    # Clean the prompt: remove punctuation and convert to lowercase
+    cleaned_prompt = re.sub(r'[^\w\s]', '', prompt.lower()).strip()
+    # Split into words for more flexible matching
+    prompt_words = set(cleaned_prompt.split())
+    for trigger in triggers:
+        trigger_words = set(trigger.split())
+        # Check if all trigger words are present in the prompt
+        if trigger_words.issubset(prompt_words):
+            return True
+    return False
 
 # Streamlit app
 st.title("Chat with Filip's AI Twin")
@@ -239,19 +246,37 @@ if prompt := st.chat_input("Ask about software team performance, AI engineering,
     with st.chat_message("user"):
         st.markdown(prompt)
     
+    # Reset agent state if starting a new conversation
+    if not st.session_state.agent_state["lead_qualifying"] and not st.session_state.agent_state["diagnostic_active"]:
+        st.session_state.agent_state["step"] = 0
+        st.session_state.agent_state["lead_score"] = 0
+        st.session_state.agent_state["team_metrics"] = {}
+        st.session_state.agent_state.pop("team_size", None)
+        st.session_state.agent_state.pop("cycle_time", None)
+        st.session_state.agent_state.pop("ai_usage", None)
+        st.session_state.agent_state.pop("lead_info", None)
+
     # Check if we should trigger an agent
-    prompt_lower = prompt.lower()
     response = None
-    if any(phrase in prompt_lower for phrase in LEAD_QUALIFICATION_TRIGGERS):
-        response = lead_qualification_agent(prompt)
-    elif any(phrase in prompt_lower for phrase in DIAGNOSTIC_TRIGGERS):
-        response = engineering_diagnostic_agent(prompt)
+    if st.session_state.agent_state["lead_qualifying"]:
+        response = lead_qualification_agent(prompt, st.session_state.agent_state["step"])
+    elif st.session_state.agent_state["diagnostic_active"]:
+        response = engineering_diagnostic_agent(prompt, st.session_state.agent_state["step"])
     else:
-        # Retrieve relevant documents for general queries
-        query_embedding = embedder.encode([prompt])[0]
-        results = collection.query(query_embeddings=[query_embedding.tolist()], n_results=3)
-        context = " ".join(results["documents"][0])
-        response = query_grok(prompt, context)
+        if matches_trigger(prompt, LEAD_QUALIFICATION_TRIGGERS):
+            st.session_state.agent_state["lead_qualifying"] = True
+            st.session_state.agent_state["step"] = 1
+            response = lead_qualification_agent(prompt, 1)
+        elif matches_trigger(prompt, DIAGNOSTIC_TRIGGERS):
+            st.session_state.agent_state["diagnostic_active"] = True
+            st.session_state.agent_state["step"] = 1
+            response = engineering_diagnostic_agent(prompt, 1)
+        else:
+            # Retrieve relevant documents for general queries
+            query_embedding = embedder.encode([prompt])[0]
+            results = collection.query(query_embeddings=[query_embedding.tolist()], n_results=3)
+            context = " ".join(results["documents"][0])
+            response = query_grok(prompt, context)
 
     # Display response
     with st.chat_message("assistant"):
