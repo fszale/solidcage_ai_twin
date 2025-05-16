@@ -1,0 +1,4 @@
+chromadb==1.0.9
+Requests==2.32.3
+sentence_transformers==4.1.0
+streamlit==1.45.1
