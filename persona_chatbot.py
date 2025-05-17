@@ -16,7 +16,7 @@ GROK_API_KEY = st.secrets["grok_api_key"]  # Ensure you set this in your Streaml
 # Initialize Instantly.ai API credentials
 INSTANTLY_API_KEY = st.secrets["instantly_api_key"]  # Add to Streamlit secrets
 INSTANTLY_CAMPAIGN_ID = st.secrets["instantly_campaign_id"]  # Add to Streamlit secrets
-INSTANTLY_API_URL = "https://api.instantly.ai/v2/lead/add"
+INSTANTLY_API_URL = "https://api.instantly.ai/api/v2/leads"
 
 # Initialize Chroma and Sentence-BERT
 chroma_client = chromadb.Client()
@@ -76,10 +76,10 @@ def sync_lead_to_instantly(name, email, team_size, cycle_time, ai_usage, lead_sc
         "Content-Type": "application/json"
     }
     payload = {
-        "campaign_id": INSTANTLY_CAMPAIGN_ID,
+        "campaign": INSTANTLY_CAMPAIGN_ID,
         "email": email,
         "first_name": name,
-        "custom_fields": {
+        "custom_variables": {
             "team_size": team_size,
             "cycle_time": cycle_time,
             "ai_usage": ai_usage,
