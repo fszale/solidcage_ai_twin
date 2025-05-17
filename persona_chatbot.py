@@ -131,7 +131,7 @@ def lead_qualification_agent(prompt, step):
         if "no" in ai_usage:
             state["lead_score"] += 2  # High potential if not using AI
         state["step"] = 4
-        return "Thanks! Lastly, may I have your name and email to follow up with personalized insights?"
+        return "Thanks! Lastly, may I have your name and email to follow up with personalized insights (e.g., John, john@email.com)?"
 
     # Step 4: Collect lead information
     if step == 4:
@@ -247,20 +247,8 @@ st.title("Chat with Filip's AI Twin")
 # Marketing section
 st.markdown("---")
 st.markdown("""
-#### Meet Filip Szalewicz, Your Fractional CTO!
-With over 20+ years as a CTO, VP of Engineering, Architect and Principal Software Engineer, Filip specializes in transforming software teams. Through [Fractional Consulting](https://www.solidcage.com), he delivers actionable strategies to boost productivity, spark innovation, and cut costs. Check out his insights on YouTube ([@Control-The-Outcome](https://www.youtube.com/@Control-The-Outcome)) or chat with his AI Twin below. 
-#### Ready to optimize your team?
+Ask about software team performance, AI engineering, or say 'help my team' or 'assess my team' to trigger agents!
 """)
-st.markdown(
-    """
-    <a href="https://cal.com/filip-szalewicz-wl6x3a/30min" target="_blank">
-        <button style="background-color: #eb6928; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
-            Book a FREE 30-Minute Strategy Call Now
-        </button>
-    </a>
-    """,
-    unsafe_allow_html=True
-)
 st.markdown("---")
 
 if "messages" not in st.session_state:
@@ -276,7 +264,7 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # Handle user input with updated placeholder
-if prompt := st.chat_input("Ask about software team performance, AI engineering, or say 'help my team' or 'assess my team' to trigger agents!"):
+if prompt := st.chat_input("Ask about improving software team performance."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -320,3 +308,20 @@ if prompt := st.chat_input("Ask about software team performance, AI engineering,
     # Suggest booking (every 3rd interaction)
     if len(st.session_state.messages) % 6 == 0:
         st.markdown("Want to dive deeper? [Book a FREE 30-Minute strategy session!](https://cal.com/filip-szalewicz-wl6x3a/30min)")
+
+st.markdown("---")
+st.markdown("""
+#### Meet Filip Szalewicz, Your Fractional CTO!
+With over 20+ years as a CTO, VP of Engineering, Architect and Principal Software Engineer, Filip specializes in transforming software teams. Through [Fractional Consulting](https://www.solidcage.com), he delivers actionable strategies to boost productivity, spark innovation, and cut costs. Check out his insights on YouTube ([@Control-The-Outcome](https://www.youtube.com/@Control-The-Outcome)) or chat with his AI Twin below. 
+#### Ready to optimize your team?
+""")
+st.markdown(
+    """
+    <a href="https://cal.com/filip-szalewicz-wl6x3a/30min" target="_blank">
+        <button style="background-color: #eb6928; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+            Book a FREE 30-Minute Strategy Call Now
+        </button>
+    </a>
+    """,
+    unsafe_allow_html=True
+)
