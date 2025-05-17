@@ -13,6 +13,11 @@ import re
 GROK_API_URL = "https://api.x.ai/v1/chat/completions"
 GROK_API_KEY = st.secrets["grok_api_key"]  # Ensure you set this in your Streamlit secrets
 
+# Initialize Instantly.ai API credentials
+INSTANTLY_API_KEY = st.secrets["instantly_api_key"]  # Add to Streamlit secrets
+INSTANTLY_CAMPAIGN_ID = st.secrets["instantly_campaign_id"]  # Add to Streamlit secrets
+INSTANTLY_API_URL = "https://api.instantly.ai/v2/lead/add"
+
 # Initialize Chroma and Sentence-BERT
 chroma_client = chromadb.Client()
 collection = chroma_client.get_or_create_collection("persona_knowledge")
@@ -64,6 +69,32 @@ def query_grok(prompt, context):
     except Exception as e:
         return f"Failed to parse API response: {e}\nRaw response: {response.text}"
 
+# Function to sync lead data with Instantly.ai
+def sync_lead_to_instantly(name, email, team_size, cycle_time, ai_usage, lead_score):
+    headers = {
+        "Authorization": f"Bearer {INSTANTLY_API_KEY}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "campaign_id": INSTANTLY_CAMPAIGN_ID,
+        "email": email,
+        "first_name": name,
+        "custom_fields": {
+            "team_size": team_size,
+            "cycle_time": cycle_time,
+            "ai_usage": ai_usage,
+            "lead_score": lead_score
+        }
+    }
+    try:
+        response = requests.post(INSTANTLY_API_URL, json=payload, headers=headers)
+        if response.status_code == 200:
+            print(f"Successfully added lead {name} ({email}) to Instantly.ai campaign")
+        else:
+            print(f"Failed to add lead to Instantly.ai: {response.text}")
+    except Exception as e:
+        print(f"Error syncing lead to Instantly.ai: {e}")
+
 # Lead Qualification Agent
 def lead_qualification_agent(prompt, step):
     state = st.session_state.agent_state
@@ -108,6 +139,10 @@ def lead_qualification_agent(prompt, step):
         if len(lead_info) >= 2:
             name, email = lead_info[0].strip(), lead_info[1].strip()
             lead_data.append({"name": name, "email": email, "team_size": state["team_size"], "cycle_time": state["cycle_time"], "ai_usage": state["ai_usage"], "lead_score": state["lead_score"]})
+            
+            # Sync lead data with Instantly.ai
+            sync_lead_to_instantly(name, email, state["team_size"], state["cycle_time"], state["ai_usage"], state["lead_score"])
+            
             # Determine response based on lead score
             if state["lead_score"] >= 5:
                 response = f"Hi {name}, based on your input, I can significantly help your team! With {state['team_size']} engineers and a {state['cycle_time']}-day cycle time, I can cut that by 50% using AI-driven practices. Let’s discuss how—[Book a free 30-minute strategy session](https://cal.com/filip-szalewicz-wl6x3a/30min)."
@@ -183,7 +218,7 @@ def engineering_diagnostic_agent(prompt, step):
 # Define trigger phrases for agents
 LEAD_QUALIFICATION_TRIGGERS = [
     "qualify my team", "tell me about my team", "assess my team readiness",
-    "evaluate my team", "check if my team fits", "can you help my team",
+    "evaluate my team", "check if my team fits", "can you help my team", "help my team",
     "is my team a good fit", "support my team"
 ]
 
@@ -241,7 +276,7 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # Handle user input with updated placeholder
-if prompt := st.chat_input("Ask about software team performance, AI engineering, or say 'qualify my team' or 'diagnose my team' to trigger agents!"):
+if prompt := st.chat_input("Ask about software team performance, AI engineering, or say 'help my team' or 'assess my team' to trigger agents!"):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -254,7 +289,6 @@ if prompt := st.chat_input("Ask about software team performance, AI engineering,
         st.session_state.agent_state.pop("team_size", None)
         st.session_state.agent_state.pop("cycle_time", None)
         st.session_state.agent_state.pop("ai_usage", None)
-        st.session_state.agent_state.pop("lead_info", None)
 
     # Check if we should trigger an agent
     response = None
