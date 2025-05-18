@@ -69,6 +69,13 @@ def query_grok(prompt, context):
     except Exception as e:
         return f"Failed to parse API response: {e}\nRaw response: {response.text}"
 
+# Streamlit app
+# Check for health endpoint
+query_params = st.experimental_get_query_params()
+if query_params.get("path", [""])[0] == "health":
+    st.write({"status": "healthy", "message": "App is running"})
+    st.stop()
+    
 # Function to sync lead data with Instantly.ai
 def sync_lead_to_instantly(name, email, team_size, cycle_time, ai_usage, lead_score):
     headers = {
