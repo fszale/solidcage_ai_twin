@@ -71,7 +71,7 @@ def query_grok(prompt, context):
 
 # Streamlit app
 # Check for health endpoint
-if st.query_params["path"] == "health":
+if st.query_params.get("path", "") == "health":
     st.write({"status": "healthy", "message": "App is running"})
     st.stop()
     
