@@ -19,10 +19,19 @@ load_dotenv()
 
 # Helper to get secrets with fallback
 def get_secret(key, default=None):
-    if key in st.secrets:
-        return st.secrets[key]
+    # Try Environment Variables first (preferred for Cloud Run)
     val = os.getenv(key.upper()) or os.getenv(key.lower())
-    return val if val else default
+    if val:
+        return val
+        
+    # Fallback to st.secrets only if available (prevents StreamlitSecretNotFoundError)
+    try:
+        if key in st.secrets:
+            return st.secrets[key]
+    except Exception:
+        pass
+        
+    return default
 
 # Initialize Grok API
 GROK_API_URL = "https://api.x.ai/v1/chat/completions"
