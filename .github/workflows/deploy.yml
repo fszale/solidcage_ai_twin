@@ -15,6 +15,7 @@ jobs:
   deploy:
     name: Deploy to Cloud Run
     runs-on: ubuntu-latest
+    environment: GCP
 
     permissions:
       contents: 'read'
