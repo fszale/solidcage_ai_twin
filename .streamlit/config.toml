@@ -1,3 +1,9 @@
 [theme]
 base="dark"
 primaryColor="#eb6928"
+
+[server]
+fileWatcherType = "none"
+
+[browser]
+gatherUsageStats = false

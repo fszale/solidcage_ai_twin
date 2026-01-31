@@ -1,2 +1,6 @@
 .streamlit/secrets.toml
 .devcontainer/*
+.env
+brain/*
+.venv/*
+chroma_db/

@@ -1,0 +1,20 @@
+# Exclude local database and knowledge base (fetched dynamically or kept local)
+chroma_db/
+knowledge_base/
+
+# Exclude environment and secrets
+.env
+.streamlit/secrets.toml
+
+# Exclude IDE and build artifacts
+.git/
+.github/
+.devcontainer/
+.venv/
+__pycache__/
+*.pyc
+
+# Exclude meta files
+Dockerfile
+README.md
+brain/
