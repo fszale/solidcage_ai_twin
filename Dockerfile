@@ -22,6 +22,9 @@ COPY requirements.txt .
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Pre-download the SentenceTransformer model to avoid Hugging Face rate limits at runtime
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
+
 # Copy the rest of the application code into the container
 COPY . .
 
