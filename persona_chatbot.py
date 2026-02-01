@@ -53,7 +53,11 @@ def inject_custom_css():
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Outfit:wght@500;700&display=swap');
     
-    html, body, [class*="st-"] {
+    html, body {
+        font-family: 'Inter', sans-serif;
+    }
+
+    .main .block-container, .stMarkdown, .stButton, .stTextInput, .chat-bubble {
         font-family: 'Inter', sans-serif;
     }
     
