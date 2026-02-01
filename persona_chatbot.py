@@ -6,7 +6,12 @@ except ImportError:
     pass
 
 import streamlit as st
-st.set_page_config(page_title="Filip's Digital Twin", page_icon="🤖", layout="centered")
+st.set_page_config(
+    page_title="Filip's Digital Twin", 
+    page_icon="🤖", 
+    layout="centered",
+    initial_sidebar_state="expanded"
+)
 import requests
 import chromadb
 from sentence_transformers import SentenceTransformer
@@ -101,8 +106,8 @@ def inject_custom_css():
         box-shadow: 0 10px 15px -3px rgba(235, 105, 40, 0.3);
     }
 
-    /* Hide streamlit header and footer */
-    header {visibility: hidden;}
+    /* Hide streamlit main menu and footer, but keep sidebar toggle */
+    #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     
     /* Branding */

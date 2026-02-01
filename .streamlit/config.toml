@@ -1,6 +1,9 @@
 [theme]
 base="dark"
 primaryColor="#eb6928"
+backgroundColor="#0e1117"
+secondaryBackgroundColor="#1e293b"
+textColor="#f1f5f9"
 
 [server]
 fileWatcherType = "none"

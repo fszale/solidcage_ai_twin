@@ -4,3 +4,4 @@
 brain/*
 .venv/*
 chroma_db/
+__pycache__
