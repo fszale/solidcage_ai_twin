@@ -285,7 +285,7 @@ def lead_qualification_agent(prompt, step):
             name = name.strip()
             sync_lead_to_instantly(name, email, state.get("team_size"), state.get("cycle_time"), state.get("ai_usage"), state.get("lead_score"))
             
-            cta = "[Book a strategy session](https://crm.solidcage.com/widget/bookings/filip-szalewicz-fractional-cto-calendar-vfs0lblxh)" if state["lead_score"] >= 5 else "Check out my [resources](https://www.solidcage.com)"
+            cta = "[Book a strategy session](https://cal.com/filip-szalewicz-wl6x3a/30min)" if state["lead_score"] >= 5 else "Check out my [resources](https://www.solidcage.com)"
             response = f"Thanks {name}! Based on your team size and cycle time, there's significant room for optimization. {cta} to see how we can hit those goals."
             
             # Reset
@@ -361,4 +361,4 @@ if prompt := st.chat_input("Ask about team performance or 'help my team'..."):
         
         # Periodic CTA
         if len(st.session_state.messages) > 1 and len(st.session_state.messages) % 5 == 0:
-            st.info("💡 Want a direct strategy session? [Book a 30-min call here](https://crm.solidcage.com/widget/bookings/filip-szalewicz-fractional-cto-calendar-vfs0lblxh)")
+            st.info("💡 Want a direct strategy session? [Book a 30-min call here](https://cal.com/filip-szalewicz-wl6x3a/30min)")
